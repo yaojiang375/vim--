@@ -1,0 +1,100 @@
+set nocompatible
+source $VIMRUNTIME/vimrc_example.vim
+source $VIMRUNTIME/mswin.vim
+behave mswin
+
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let eq = ''
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      let cmd = '""' . $VIMRUNTIME . '\diff"'
+      let eq = '"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+endfunction
+set     tabstop=4               "设定Tab宽度
+set     softtabstop=4           "设定软Tab宽度
+set     expandtab               "Tab替换为空格
+set     shiftwidth=4            "自动缩进宽度
+set     nu                      "显示行号
+colorscheme   professional      "设定配色方案
+set     shortmess=atI           "不显示援救乌干达儿童的提示
+set     foldenable              "启用折叠
+set     foldmethod=manual       "折叠模式设为手动折叠
+"set termencoding=utf-8
+"set encoding=utf-8
+"set fileencodings=ucs-bom,utf-8,cp936
+"set fileencoding=utf-8
+""""""""""""""""""""""""""新文件标题"""""""""""""""""""""""""""""""
+"""""""""""新建.c,.h,.cpp,.sh文件，自动插入文件头"""""""""""""""""
+autocmd BufNewFile *.cpp,*.c,*.h,*.sh ":call SetTitle()" 
+""定义函数SetTitle，自动插入文件头 
+func SetTitle() 
+  if &filetype == 'sh' 
+        call setline(1,"\#########################################################################") 
+        call append(line("."), "\# File Name: ".expand("%")) 
+        call append(line(".")+1, "\# Author: yaojiang375") 
+        call append(line(".")+2, "\# mail: 547320073@qq.com") 
+        call append(line(".")+3, "\# Created Time: ".strftime("%c")) 
+        call append(line(".")+4, "\#########################################################################") 
+        call append(line(".")+5, "\#!/bin/bash") 
+        call append(line(".")+6, "") 
+    else 
+        call setline(1, "/*************************************************************************") 
+        call append(line("."), "    > File Name: ".expand("%")) 
+        call append(line(".")+1, "    > Author: yaojiang375") 
+        call append(line(".")+2, "    > Mail: 547320073@qq.com ") 
+        call append(line(".")+3, "    > Created Time: ".strftime("%c")) 
+        call append(line(".")+4, " ************************************************************************/") 
+        call append(line(".")+5, "")
+    endif       
+    if &filetype == 'cpp'
+        call append(line(".")+6, "#include<iostream>")
+        call append(line(".")+8, "")
+    endif
+    if &filetype == 'c'
+        call append(line(".")+6, "#include<stdio.h>")
+        call append(line(".")+7, "")
+    endif
+    "新建文件后，自动定位到文件末尾
+    autocmd BufNewFile * normal G
+endfunc 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"map设定
+"添加文件头
+map <F12> ggO/*<CR>*   File        Name            :           <c-r>=expand("%:t")<CR><CR>*   Copyright(c)                :           2013-2023 QUST,All Right Reserved.<CR>*   Module      Name            :           <CR>*   <CR>*   Create      Date            :           <c-r>=strftime("%x %X")<CR><CR>*   Author      Name            :           YaoJiang<CR>*   <CR>*   Abstract    Description     :           <CR>*    <CR>*_______________________________Revision History__________________________ <CR>*    <CR>*   No  Version     Date    RevisedBy       item        Description        <CR>*   <CR>*/
+"当编辑py文件时，按F5启动编译器
+autocmd BufRead *.py nmap <F5> :w<CR>:!C:\Python33\python.exe % <CR><CR>
+
+"添加自动补全
+filetype plugin on  
+autocmd FileType python set omnifunc=pythoncomplete
+
+"添加标签式浏览功能
+let g:miniBufExplMapWindowNavVim = 1
+let g:miniBufExplMapWindowNavArrows = 1
+let g:miniBufExplMapCTabSwitchBufs = 1
+let g:miniBufExplModSelTarget = 1
+
+
+"每行超过80字符即红色高亮显示
+highlight OverLength ctermbg=red ctermfg=white guibg=#592929 
+match OverLength /\%81v.\+/
+
+
+
